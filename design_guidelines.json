@@ -1,0 +1,84 @@
+{
+  "theme": "dark_and_light",
+  "archetype": "5 (Jewel & Luxury)",
+  "typography": {
+    "heading_font": "Cabinet Grotesk",
+    "body_font": "Satoshi",
+    "rules": [
+      "Headings (Size > 32px) MUST use tracking-tight or tracking-tighter.",
+      "Overlines / Labels MUST be Uppercase + Tiny + Wide Spacing (tracking-[0.2em]).",
+      "No generic sans for headings.",
+      "Variable fonts: use unconventional weights if available."
+    ]
+  },
+  "colors": {
+    "dark_mode": {
+      "background": "#0A0D14",
+      "surface": "#121620",
+      "border": "#2A2E39",
+      "text_primary": "#F8FAFC",
+      "text_secondary": "#94A3B8"
+    },
+    "light_mode": {
+      "background": "#FDFCF8",
+      "surface": "#FFFFFF",
+      "border": "#E2E8F0",
+      "text_primary": "#0F172A",
+      "text_secondary": "#64748B"
+    },
+    "brand_accents": {
+      "primary": "#F7931A",
+      "primary_hover": "#E57E0C",
+      "profit": "#10B981",
+      "loss": "#EF4444"
+    },
+    "forbidden": [
+      "#1B93A4",
+      "teal",
+      "space grotesk"
+    ]
+  },
+  "layout_and_spacing": {
+    "grid_system": "MODE B: THE CONTROL ROOM GRID",
+    "dashboard_layout": "Sidebar on left (w-64), Main content area with dense, compact spacing (gap-6).",
+    "spacing_scale": "Generous Spacing Philosophy (p-6, p-8 for containers). Containers with borders MUST have padding on text.",
+    "alignment": "Left-align paragraphs, labels, and metrics. Optical alignment for icons."
+  },
+  "components": {
+    "cards": "Flat background, 1px subtle border (border-border), NO soft shadow. Use sharp edges or subtle roundness (max 8px border-radius).",
+    "buttons": "Primary buttons use #F7931A with black text for contrast. Hover: Lighter hue.",
+    "inputs": "Shadcn standard inputs, customized with 1px border. Focus: ring-2 ring-primary/50.",
+    "charts": "Shadcn Chart components (Recharts). Area chart preferred for Bitcoin growth, using a golden gradient fill under the line.",
+    "sidebar": "Fixed, border-r border-border/40. Darker than main background.",
+    "login_screen": "Split screen layout. Left: Login form with minimalist inputs. Right: Hero image overlay (max overlay bg-black/50 or bg-black/30) with Bitcoin luxury image."
+  },
+  "motion_and_interactions": {
+    "hover": "ALWAYS explicitly set text color on hover. Slight lift (-translate-y-1) for dashboard cards.",
+    "focus": "Focus States must have HIGHER contrast than default state.",
+    "transitions": "Use specific properties (transition: transform 0.2s ease, opacity 0.2s ease)."
+  },
+  "media": {
+    "image_urls": {
+      "login_hero_image": {
+        "url": "https://images.unsplash.com/photo-1749492795606-51d9898710ca?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MTN8MHwxfHNlYXJjaHwyfHxiaXRjb2luJTIwcHJlbWl1bSUyMGRhcmt8ZW58MHx8fHwxNzc0OTEzODI2fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Bitcoin coin isolated on a black background. Use for the right side of the login split screen."
+      },
+      "dashboard_texture": {
+        "url": "https://images.unsplash.com/photo-1582035100994-9ddfc34b1dae?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MDV8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBkYXJrJTIwc2xhdGUlMjB0ZXh0dXJlfGVufDB8fHx8MTc3NDkxMzgyN3ww&ixlib=rb-4.1.0&q=85",
+        "description": "Dark luxury slate texture. Use as a very low opacity (5%) background blend or noise layer in dark mode."
+      }
+    }
+  },
+  "testing": {
+    "rules": "All interactive and key informational elements MUST include a data-testid attribute in kebab-case (e.g., data-testid='login-submit-button')."
+  },
+  "instructions_to_main_agent": [
+    "Install and use Cabinet Grotesk for headings and Satoshi for body.",
+    "Implement a Dark/Light toggle. Default to Dark mode.",
+    "DO NOT use Teal (#1B93A4) anywhere, as it is strictly forbidden by the Anti-AI design system. Instead, rely on the premium Gold (#F7931A) and Slate/Midnight palette.",
+    "Use Shadcn UI components for Tabs, Sliders, Cards, and Inputs, customized for 'Cardless, rectangular' look.",
+    "Use Phosphor Icons (@phosphor-icons/react) for a premium, dense dashboard look.",
+    "For the Chart, use Shadcn Charts (Recharts under the hood) showing an Area Chart with base vs user growth over time.",
+    "The login screen MUST use the provided 'login_hero_image' url on one side, with max 50% black overlay."
+  ]
+}
