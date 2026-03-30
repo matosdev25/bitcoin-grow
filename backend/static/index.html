@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Growth | Control de Ganancia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800,900&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            /* Dark Mode (default) */
+            --bg: #0A0D14;
+            --surface: #121620;
+            --surface-elevated: #1a1f2e;
+            --border: #2A2E39;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            
+            /* Brand */
+            --bitcoin: #F7931A;
+            --bitcoin-hover: #E57E0C;
+            --bitcoin-glow: rgba(247, 147, 26, 0.15);
+            --profit: #10B981;
+            --profit-bg: rgba(16, 185, 129, 0.1);
+            --loss: #EF4444;
+            --loss-bg: rgba(239, 68, 68, 0.1);
+            
+            /* Typography */
+            --font-heading: 'Cabinet Grotesk', sans-serif;
+            --font-body: 'Satoshi', sans-serif;
+            
+            /* Spacing */
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+
+        .light-mode {
+            --bg: #FDFCF8;
+            --surface: #FFFFFF;
+            --surface-elevated: #F8FAFC;
+            --border: #E2E8F0;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* ========== LOGIN SCREEN ========== */
+        .login-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 900px) {
+            .login-container {
+                grid-template-columns: 1fr;
+            }
+            .login-hero {
+                display: none;
+            }
+        }
+
+        .login-hero {
+            position: relative;
+            background-image: url('https://images.unsplash.com/photo-1749492795606-51d9898710ca?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MTN8MHwxfHNlYXJjaHwyfHxiaXRjb2luJTIwcHJlbWl1bSUyMGRhcmt8ZW58MHx8fHwxNzc0OTEzODI2fDA&ixlib=rb-4.1.0&q=85');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .login-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(10, 13, 20, 0.85) 0%, rgba(10, 13, 20, 0.6) 100%);
+        }
+
+        .login-hero-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+            height: 100%;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bitcoin-glow);
+            border: 1px solid var(--bitcoin);
+            color: var(--bitcoin);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+            width: fit-content;
+        }
+
+        .hero-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            max-width: 400px;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .hero-stat {
+            text-align: left;
+        }
+
+        .hero-stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 0.25rem;
+        }
+
+        .hero-stat-value {
+            font-family: var(--font-heading);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .hero-stat-value.bitcoin {
+            color: var(--bitcoin);
+        }
+
+        .login-form-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: var(--bg);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .login-logo svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .login-logo-text {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .login-heading {
+            font-family: var(--font-heading);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .login-subtext {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--bitcoin);
+            box-shadow: 0 0 0 3px var(--bitcoin-glow);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--bitcoin);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: var(--bitcoin-hover);
+            box-shadow: 0 4px 20px var(--bitcoin-glow);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 0.5rem 0.75rem;
+        }
+
+        .btn-ghost:hover {
+            color: var(--text-primary);
+            background: var(--surface);
+        }
+
+        .error-message {
+            background: var(--loss-bg);
+            border: 1px solid var(--loss);
+            color: var(--loss);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* ========== DASHBOARD ========== */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .dashboard.active {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard.active {
+                grid-template-columns: 1fr;
+                display: flex;
+                flex-direction: column;
+            }
+            .sidebar {
+                display: none !important;
+            }
+            .desktop-only {
+                display: none !important;
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-logo svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .sidebar-brand {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .sidebar-tagline {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            padding-left: 52px;
+        }
+
+        .sidebar-card {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-card-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-card-value {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--bitcoin);
+        }
+
+        .sidebar-card-value.small {
+            font-size: 1.125rem;
+        }
+
+        .sidebar-bullets {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-bullet {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .sidebar-bullet-icon {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--bitcoin-glow);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bitcoin);
+            font-size: 0.6rem;
+            margin-top: 2px;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 1.5rem 2rem;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        .topbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .topbar-left {
+            flex: 1;
+        }
+
+        .topbar-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .topbar-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+        }
+
+        .topbar-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+        }
+
+        /* Hero Card */
+        .hero-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--bitcoin-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-card-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-card-value {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .hero-card-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bitcoin-glow);
+            border: 1px solid var(--bitcoin);
+            color: var(--bitcoin);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .hero-card-chip svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .hero-card-text {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-value.profit {
+            color: var(--profit);
+        }
+
+        .metric-value.loss {
+            color: var(--loss);
+        }
+
+        .metric-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .metric-change.up {
+            background: var(--profit-bg);
+            color: var(--profit);
+        }
+
+        .metric-change.down {
+            background: var(--loss-bg);
+            color: var(--loss);
+        }
+
+        /* Simulator */
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .simulator-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .simulator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .simulator-input-group label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .simulator-input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .simulator-input-group input:focus {
+            outline: none;
+            border-color: var(--bitcoin);
+            box-shadow: 0 0 0 2px var(--bitcoin-glow);
+        }
+
+        .slider-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .slider-value {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--bitcoin);
+        }
+
+        .price-slider {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .price-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--bitcoin);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(247, 147, 26, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .price-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .price-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--bitcoin);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .simulator-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .mini-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .mini-metric {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .mini-metric-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .mini-metric-value {
+            font-family: var(--font-heading);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Chart */
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.base {
+            background: var(--bitcoin);
+        }
+
+        .legend-dot.user {
+            background: var(--profit);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Loading */
+        .price-loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--bitcoin);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile sidebar toggle */
+        .mobile-header {
+            display: none;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .mobile-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mobile-logo svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .mobile-logo span {
+            font-family: var(--font-heading);
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== LOGIN SCREEN ========== -->
+    <div id="login-screen" class="login-container" data-testid="login-screen">
+        <div class="login-hero">
+            <div class="login-hero-content">
+                <div class="hero-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                    </svg>
+                    Panel Privado
+                </div>
+                <h1 class="hero-title">Visualiza el crecimiento real de tu capital en Bitcoin</h1>
+                <p class="hero-subtitle">Accede a tu panel personalizado para ver cómo crece tu inversión dentro de una operación base profesional.</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-label">Base Inicial</div>
+                        <div class="hero-stat-value">$2,000</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-label">Tu Capital</div>
+                        <div class="hero-stat-value bitcoin">$100</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="login-form-container">
+            <div class="login-card">
+                <div class="login-logo">
+                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24" cy="24" r="22" fill="#F7931A"/>
+                        <path d="M32.5 21.5c.5-3.5-2-5.5-5.5-6.5l1-4.5-2.5-.5-1 4.5c-.7-.2-1.4-.3-2-.5l1-4.5-2.5-.5-1 4.5c-.5-.1-1-.2-1.5-.3l-3.5-.8-.5 2.5s2 .4 2 .5c1 .2 1.2 1 1.2 1.5l-1.2 5c.1 0 .2 0 .3.1-.1 0-.2-.1-.3-.1l-1.7 7c-.1.3-.4.8-1 .6 0 0-2-.5-2-.5l-1.3 2.7 3.3.8c.6.2 1.2.3 1.8.5l-1 4.5 2.5.5 1-4.5c.7.2 1.4.4 2 .5l-1 4.5 2.5.5 1-4.5c4.5.8 8 .5 9.5-3.5 1.2-3.2 0-5-2.5-6.2 1.8-.4 3.2-1.6 3.5-4zm-6.2 8.7c-.8 3.5-6.5 1.6-8.3 1.1l1.5-6c1.8.5 7.7 1.4 6.8 4.9zm.8-8.7c-.8 3.2-5.5 1.5-7 1.1l1.3-5.5c1.5.4 6.5 1.1 5.7 4.4z" fill="white"/>
+                    </svg>
+                    <span class="login-logo-text">Bitcoin Growth</span>
+                </div>
+                
+                <h2 class="login-heading">Acceso Privado</h2>
+                <p class="login-subtext">Ingresa tu contraseña para ver el estado de tu inversión.</p>
+                
+                <div id="login-error" class="error-message" role="alert" aria-live="polite" data-testid="login-error">
+                    Contraseña incorrecta. Intenta de nuevo.
+                </div>
+                
+                <form id="login-form" data-testid="login-form">
+                    <div class="form-group">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            class="form-input" 
+                            placeholder="Ingresa tu contraseña"
+                            autocomplete="current-password"
+                            required
+                            data-testid="password-input"
+                            aria-describedby="login-error"
+                        >
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-testid="login-submit-button">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        Abrir Mini App
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== DASHBOARD ========== -->
+    <div id="dashboard" class="dashboard" data-testid="dashboard">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <div class="mobile-logo">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="22" fill="#F7931A"/>
+                    <path d="M32.5 21.5c.5-3.5-2-5.5-5.5-6.5l1-4.5-2.5-.5-1 4.5c-.7-.2-1.4-.3-2-.5l1-4.5-2.5-.5-1 4.5c-.5-.1-1-.2-1.5-.3l-3.5-.8-.5 2.5s2 .4 2 .5c1 .2 1.2 1 1.2 1.5l-1.2 5c.1 0 .2 0 .3.1-.1 0-.2-.1-.3-.1l-1.7 7c-.1.3-.4.8-1 .6 0 0-2-.5-2-.5l-1.3 2.7 3.3.8c.6.2 1.2.3 1.8.5l-1 4.5 2.5.5 1-4.5c.7.2 1.4.4 2 .5l-1 4.5 2.5.5 1-4.5c4.5.8 8 .5 9.5-3.5 1.2-3.2 0-5-2.5-6.2 1.8-.4 3.2-1.6 3.5-4zm-6.2 8.7c-.8 3.5-6.5 1.6-8.3 1.1l1.5-6c1.8.5 7.7 1.4 6.8 4.9zm.8-8.7c-.8 3.2-5.5 1.5-7 1.1l1.3-5.5c1.5.4 6.5 1.1 5.7 4.4z" fill="white"/>
+                </svg>
+                <span>Bitcoin Growth</span>
+            </div>
+            <div class="topbar-actions">
+                <button class="theme-toggle" id="mobile-theme-toggle" aria-label="Cambiar tema" data-testid="mobile-theme-toggle">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    </svg>
+                </button>
+                <button class="btn btn-ghost" id="mobile-logout" data-testid="mobile-logout-button">Cerrar</button>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" data-testid="sidebar">
+            <div class="sidebar-logo">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="22" fill="#F7931A"/>
+                    <path d="M32.5 21.5c.5-3.5-2-5.5-5.5-6.5l1-4.5-2.5-.5-1 4.5c-.7-.2-1.4-.3-2-.5l1-4.5-2.5-.5-1 4.5c-.5-.1-1-.2-1.5-.3l-3.5-.8-.5 2.5s2 .4 2 .5c1 .2 1.2 1 1.2 1.5l-1.2 5c.1 0 .2 0 .3.1-.1 0-.2-.1-.3-.1l-1.7 7c-.1.3-.4.8-1 .6 0 0-2-.5-2-.5l-1.3 2.7 3.3.8c.6.2 1.2.3 1.8.5l-1 4.5 2.5.5 1-4.5c.7.2 1.4.4 2 .5l-1 4.5 2.5.5 1-4.5c4.5.8 8 .5 9.5-3.5 1.2-3.2 0-5-2.5-6.2 1.8-.4 3.2-1.6 3.5-4zm-6.2 8.7c-.8 3.5-6.5 1.6-8.3 1.1l1.5-6c1.8.5 7.7 1.4 6.8 4.9zm.8-8.7c-.8 3.2-5.5 1.5-7 1.1l1.3-5.5c1.5.4 6.5 1.1 5.7 4.4z" fill="white"/>
+                </svg>
+                <span class="sidebar-brand">Bitcoin Growth</span>
+            </div>
+            <p class="sidebar-tagline">Control de ganancia por capital</p>
+
+            <div class="sidebar-card" data-testid="sidebar-btc-card">
+                <div class="sidebar-card-label">BTC Comprado</div>
+                <div class="sidebar-card-value small" id="sidebar-btc-amount">0.02797203 BTC</div>
+            </div>
+
+            <div class="sidebar-card" data-testid="sidebar-ownership-card">
+                <div class="sidebar-card-label">Tu Participacion</div>
+                <div class="sidebar-card-value" id="sidebar-ownership">5.00%</div>
+            </div>
+
+            <div class="sidebar-bullets">
+                <div class="sidebar-bullet">
+                    <div class="sidebar-bullet-icon">1</div>
+                    <span>Ve tu parte real sobre una operacion mas grande.</span>
+                </div>
+                <div class="sidebar-bullet">
+                    <div class="sidebar-bullet-icon">2</div>
+                    <span>El panel muestra cuanto ganas hoy y cuanto creceria si aumentas capital.</span>
+                </div>
+                <div class="sidebar-bullet">
+                    <div class="sidebar-bullet-icon">3</div>
+                    <span>La grafica ayuda a visualizar el avance sin explicar formulas.</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" data-testid="main-content">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <span class="topbar-badge">Panel Principal</span>
+                    <h1 class="topbar-title">Haz visible el crecimiento del capital.</h1>
+                    <p class="topbar-subtitle">Monitorea tu inversion y simula escenarios de crecimiento.</p>
+                </div>
+                <div class="topbar-actions desktop-only">
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema" data-testid="theme-toggle">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-secondary" id="logout-btn" data-testid="logout-button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hero Card -->
+            <div class="hero-card" data-testid="hero-card">
+                <div class="hero-card-label">Valor Actual del Portafolio Base</div>
+                <div class="hero-card-value" id="portfolio-value" data-testid="portfolio-value">$2,308.39</div>
+                <div class="hero-card-chip" id="btc-price-chip" data-testid="btc-price-chip">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                        <path d="M13.5 8.5c.3 0 .5.2.5.5v1h1v-1c0-.8-.7-1.5-1.5-1.5h-3c-.8 0-1.5.7-1.5 1.5v1c0 .6.4 1.1.9 1.4l3.2 1.6c.2.1.4.4.4.6v1c0 .3-.2.5-.5.5h-3c-.3 0-.5-.2-.5-.5v-1h-1v1c0 .8.7 1.5 1.5 1.5h3c.8 0 1.5-.7 1.5-1.5v-1c0-.6-.4-1.1-.9-1.4l-3.2-1.6c-.2-.1-.4-.4-.4-.6v-1c0-.3.2-.5.5-.5h3z"/>
+                    </svg>
+                    <span id="current-btc-display">BTC: $82,500</span>
+                </div>
+                <p class="hero-card-text" id="hero-description">
+                    Con un capital base de <strong>$2,000 USD</strong> y un precio de entrada de <strong>$71,500</strong>, 
+                    el portafolio ha crecido gracias al movimiento del mercado.
+                </p>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="metrics-grid" data-testid="metrics-grid">
+                <div class="metric-card" data-testid="base-profit-card">
+                    <div class="metric-label">Ganancia de la Base</div>
+                    <div class="metric-value profit" id="base-profit">+$308.39</div>
+                    <div class="metric-change up" id="base-return">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="18 15 12 9 6 15"/>
+                        </svg>
+                        +15.38%
+                    </div>
+                </div>
+                <div class="metric-card" data-testid="user-value-card">
+                    <div class="metric-label">Valor del Usuario</div>
+                    <div class="metric-value" id="user-value">$115.42</div>
+                    <div class="metric-change up" id="user-value-change">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="18 15 12 9 6 15"/>
+                        </svg>
+                        Tu parte hoy
+                    </div>
+                </div>
+                <div class="metric-card" data-testid="user-profit-card">
+                    <div class="metric-label">Ganancia del Usuario</div>
+                    <div class="metric-value profit" id="user-profit">+$15.42</div>
+                    <div class="metric-change up" id="user-profit-change">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="18 15 12 9 6 15"/>
+                        </svg>
+                        +15.38%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulator -->
+            <h2 class="section-title">Simulador</h2>
+            <div class="simulator-card" data-testid="simulator-card">
+                <div class="simulator-grid">
+                    <div class="simulator-input-group">
+                        <label for="capital-base">Capital Base (USD)</label>
+                        <input type="number" id="capital-base" value="2000" min="100" step="100" data-testid="capital-base-input" aria-label="Capital base en USD">
+                    </div>
+                    <div class="simulator-input-group">
+                        <label for="entry-price">Precio Entrada BTC</label>
+                        <input type="number" id="entry-price" value="71500" min="1000" step="100" data-testid="entry-price-input" aria-label="Precio de entrada de Bitcoin">
+                    </div>
+                    <div class="simulator-input-group">
+                        <label for="current-price">Precio Actual BTC</label>
+                        <input type="number" id="current-price" value="82500" min="1000" step="100" data-testid="current-price-input" aria-label="Precio actual de Bitcoin">
+                    </div>
+                    <div class="simulator-input-group">
+                        <label for="user-capital">Tu Capital (USD)</label>
+                        <input type="number" id="user-capital" value="100" min="10" step="10" data-testid="user-capital-input" aria-label="Tu capital en USD">
+                    </div>
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Precio BTC (Slider)</span>
+                        <span class="slider-value" id="slider-value">$82,500</span>
+                    </div>
+                    <input type="range" class="price-slider" id="price-slider" min="60000" max="120000" step="500" value="82500" data-testid="price-slider" aria-label="Deslizador de precio de Bitcoin">
+                </div>
+
+                <div class="simulator-buttons">
+                    <button class="btn btn-primary" id="recalculate-btn" data-testid="recalculate-button">Recalcular</button>
+                    <button class="btn btn-secondary" id="bullish-btn" data-testid="bullish-button">Escenario Alcista</button>
+                    <button class="btn btn-secondary" id="conservative-btn" data-testid="conservative-button">Escenario Conservador</button>
+                    <button class="btn btn-ghost" id="reset-btn" data-testid="reset-button">Restablecer</button>
+                    <button class="btn btn-secondary" id="fetch-price-btn" data-testid="fetch-price-button">
+                        <span class="price-loading hidden" id="price-loading">
+                            <span class="spinner"></span>
+                            Cargando...
+                        </span>
+                        <span id="fetch-price-text">Precio Real</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mini Metrics -->
+            <div class="mini-metrics" data-testid="mini-metrics">
+                <div class="mini-metric">
+                    <div class="mini-metric-label">Capital Base</div>
+                    <div class="mini-metric-value" id="mini-capital-base">$2,000</div>
+                </div>
+                <div class="mini-metric">
+                    <div class="mini-metric-label">Precio Entrada</div>
+                    <div class="mini-metric-value" id="mini-entry-price">$71,500</div>
+                </div>
+                <div class="mini-metric">
+                    <div class="mini-metric-label">Precio Actual</div>
+                    <div class="mini-metric-value" id="mini-current-price">$82,500</div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-card" data-testid="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Crecimiento Estimado</h3>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-dot base"></span>
+                            <span>Base</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot user"></span>
+                            <span>Usuario</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="growth-chart" aria-label="Grafica de crecimiento comparando la base vs el usuario" data-testid="growth-chart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const USERS = {
+            'mipapimartin': { capital: 100, name: 'Usuario 1' },
+            'soytuperra': { capital: 100, name: 'Usuario 2' }
+        };
+
+        const DEFAULTS = {
+            capitalBase: 2000,
+            entryPrice: 71500,
+            currentPrice: 82500,
+            userCapital: 100
+        };
+
+        // ========== STATE ==========
+        let state = {
+            capitalBase: DEFAULTS.capitalBase,
+            entryPrice: DEFAULTS.entryPrice,
+            currentPrice: DEFAULTS.currentPrice,
+            userCapital: DEFAULTS.userCapital,
+            isDarkMode: true,
+            currentUser: null
+        };
+
+        let chart = null;
+
+        // ========== ELEMENTS ==========
+        const loginScreen = document.getElementById('login-screen');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('login-form');
+        const passwordInput = document.getElementById('password');
+        const loginError = document.getElementById('login-error');
+
+        const capitalBaseInput = document.getElementById('capital-base');
+        const entryPriceInput = document.getElementById('entry-price');
+        const currentPriceInput = document.getElementById('current-price');
+        const userCapitalInput = document.getElementById('user-capital');
+        const priceSlider = document.getElementById('price-slider');
+
+        // ========== HELPERS ==========
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+
+        function formatBTC(value) {
+            return value.toFixed(8) + ' BTC';
+        }
+
+        function formatPercent(value) {
+            return value.toFixed(2) + '%';
+        }
+
+        // ========== CALCULATIONS ==========
+        function calculate() {
+            const { capitalBase, entryPrice, currentPrice, userCapital } = state;
+
+            // BTC amount purchased
+            const btcAmount = capitalBase / entryPrice;
+
+            // Portfolio value
+            const portfolioValue = btcAmount * currentPrice;
+
+            // Base profit
+            const baseProfit = portfolioValue - capitalBase;
+
+            // Base return percentage
+            const baseReturn = (baseProfit / capitalBase) * 100;
+
+            // User ownership percentage
+            const ownership = userCapital / capitalBase;
+
+            // User value
+            const userValue = portfolioValue * ownership;
+
+            // User profit
+            const userProfit = userValue - userCapital;
+
+            // User return percentage
+            const userReturn = (userProfit / userCapital) * 100;
+
+            return {
+                btcAmount,
+                portfolioValue,
+                baseProfit,
+                baseReturn,
+                ownership: ownership * 100,
+                userValue,
+                userProfit,
+                userReturn
+            };
+        }
+
+        // ========== UI UPDATES ==========
+        function updateUI() {
+            const data = calculate();
+
+            // Sidebar
+            document.getElementById('sidebar-btc-amount').textContent = formatBTC(data.btcAmount);
+            document.getElementById('sidebar-ownership').textContent = formatPercent(data.ownership);
+
+            // Hero card
+            document.getElementById('portfolio-value').textContent = formatCurrency(data.portfolioValue);
+            document.getElementById('current-btc-display').textContent = `BTC: ${formatCurrency(state.currentPrice)}`;
+
+            // Metrics
+            const baseProfitEl = document.getElementById('base-profit');
+            baseProfitEl.textContent = (data.baseProfit >= 0 ? '+' : '') + formatCurrency(data.baseProfit);
+            baseProfitEl.className = 'metric-value ' + (data.baseProfit >= 0 ? 'profit' : 'loss');
+
+            const baseReturnEl = document.getElementById('base-return');
+            baseReturnEl.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="${data.baseReturn >= 0 ? '18 15 12 9 6 15' : '6 9 12 15 18 9'}"/>
+                </svg>
+                ${data.baseReturn >= 0 ? '+' : ''}${formatPercent(data.baseReturn)}
+            `;
+            baseReturnEl.className = 'metric-change ' + (data.baseReturn >= 0 ? 'up' : 'down');
+
+            document.getElementById('user-value').textContent = formatCurrency(data.userValue);
+
+            const userProfitEl = document.getElementById('user-profit');
+            userProfitEl.textContent = (data.userProfit >= 0 ? '+' : '') + formatCurrency(data.userProfit);
+            userProfitEl.className = 'metric-value ' + (data.userProfit >= 0 ? 'profit' : 'loss');
+
+            const userProfitChangeEl = document.getElementById('user-profit-change');
+            userProfitChangeEl.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="${data.userReturn >= 0 ? '18 15 12 9 6 15' : '6 9 12 15 18 9'}"/>
+                </svg>
+                ${data.userReturn >= 0 ? '+' : ''}${formatPercent(data.userReturn)}
+            `;
+            userProfitChangeEl.className = 'metric-change ' + (data.userReturn >= 0 ? 'up' : 'down');
+
+            // Mini metrics
+            document.getElementById('mini-capital-base').textContent = formatCurrency(state.capitalBase);
+            document.getElementById('mini-entry-price').textContent = formatCurrency(state.entryPrice);
+            document.getElementById('mini-current-price').textContent = formatCurrency(state.currentPrice);
+
+            // Slider value display
+            document.getElementById('slider-value').textContent = formatCurrency(state.currentPrice);
+
+            // Update chart
+            updateChart();
+        }
+
+        function updateChart() {
+            const { capitalBase, entryPrice, currentPrice, userCapital } = state;
+            const btcAmount = capitalBase / entryPrice;
+            const ownership = userCapital / capitalBase;
+
+            // Calculate scenarios based on entry price
+            const scenarios = [
+                { label: 'Entrada', price: entryPrice },
+                { label: '-5%', price: entryPrice * 0.95 },
+                { label: 'Actual', price: currentPrice },
+                { label: '+10%', price: entryPrice * 1.10 },
+                { label: '+20%', price: entryPrice * 1.20 }
+            ];
+
+            const labels = scenarios.map(s => s.label);
+            const baseValues = scenarios.map(s => btcAmount * s.price);
+            const userValues = scenarios.map(s => (btcAmount * s.price) * ownership);
+
+            if (chart) {
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = baseValues;
+                chart.data.datasets[1].data = userValues;
+                chart.update('none');
+            } else {
+                const ctx = document.getElementById('growth-chart').getContext('2d');
+                
+                const isDark = state.isDarkMode;
+                const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                const textColor = isDark ? '#94A3B8' : '#64748B';
+
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Base',
+                                data: baseValues,
+                                borderColor: '#F7931A',
+                                backgroundColor: 'rgba(247, 147, 26, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#F7931A',
+                                pointBorderColor: '#F7931A',
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'Usuario',
+                                data: userValues,
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#10B981',
+                                pointBorderColor: '#10B981',
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: isDark ? '#1a1f2e' : '#fff',
+                                titleColor: isDark ? '#F8FAFC' : '#0F172A',
+                                bodyColor: isDark ? '#94A3B8' : '#64748B',
+                                borderColor: isDark ? '#2A2E39' : '#E2E8F0',
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + formatCurrency(context.raw);
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    color: gridColor,
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: textColor,
+                                    font: {
+                                        family: 'Satoshi'
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: gridColor,
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: textColor,
+                                    font: {
+                                        family: 'Satoshi'
+                                    },
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateChartTheme() {
+            if (!chart) return;
+            
+            const isDark = state.isDarkMode;
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const textColor = isDark ? '#94A3B8' : '#64748B';
+
+            chart.options.scales.x.grid.color = gridColor;
+            chart.options.scales.x.ticks.color = textColor;
+            chart.options.scales.y.grid.color = gridColor;
+            chart.options.scales.y.ticks.color = textColor;
+            chart.options.plugins.tooltip.backgroundColor = isDark ? '#1a1f2e' : '#fff';
+            chart.options.plugins.tooltip.titleColor = isDark ? '#F8FAFC' : '#0F172A';
+            chart.options.plugins.tooltip.bodyColor = isDark ? '#94A3B8' : '#64748B';
+            chart.options.plugins.tooltip.borderColor = isDark ? '#2A2E39' : '#E2E8F0';
+            
+            chart.update('none');
+        }
+
+        // ========== THEME TOGGLE ==========
+        function toggleTheme() {
+            state.isDarkMode = !state.isDarkMode;
+            document.body.classList.toggle('light-mode', !state.isDarkMode);
+            updateChartTheme();
+        }
+
+        // ========== AUTH ==========
+        function login(password) {
+            if (USERS[password]) {
+                state.currentUser = password;
+                state.userCapital = USERS[password].capital;
+                userCapitalInput.value = state.userCapital;
+                
+                loginScreen.classList.add('hidden');
+                dashboard.classList.add('active');
+                loginError.classList.remove('show');
+                
+                updateUI();
+                return true;
+            }
+            return false;
+        }
+
+        function logout() {
+            state.currentUser = null;
+            dashboard.classList.remove('active');
+            loginScreen.classList.remove('hidden');
+            passwordInput.value = '';
+        }
+
+        // ========== FETCH REAL PRICE ==========
+        async function fetchRealPrice() {
+            const loadingEl = document.getElementById('price-loading');
+            const textEl = document.getElementById('fetch-price-text');
+            
+            loadingEl.classList.remove('hidden');
+            textEl.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/btc-price');
+                const data = await response.json();
+                
+                if (data.success && data.price) {
+                    state.currentPrice = data.price;
+                    currentPriceInput.value = data.price;
+                    priceSlider.value = Math.min(Math.max(data.price, 60000), 120000);
+                    updateUI();
+                } else {
+                    console.error('Failed to fetch BTC price:', data.error);
+                    alert('No se pudo obtener el precio actual. Intenta de nuevo.');
+                }
+            } catch (error) {
+                console.error('Error fetching BTC price:', error);
+                alert('Error de conexion. Intenta de nuevo.');
+            } finally {
+                loadingEl.classList.add('hidden');
+                textEl.classList.remove('hidden');
+            }
+        }
+
+        // ========== EVENT LISTENERS ==========
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = passwordInput.value;
+            
+            if (!login(password)) {
+                loginError.classList.add('show');
+                passwordInput.focus();
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', logout);
+        document.getElementById('mobile-logout').addEventListener('click', logout);
+
+        document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+        document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
+
+        // Input listeners
+        capitalBaseInput.addEventListener('input', (e) => {
+            state.capitalBase = parseFloat(e.target.value) || DEFAULTS.capitalBase;
+            updateUI();
+        });
+
+        entryPriceInput.addEventListener('input', (e) => {
+            state.entryPrice = parseFloat(e.target.value) || DEFAULTS.entryPrice;
+            updateUI();
+        });
+
+        currentPriceInput.addEventListener('input', (e) => {
+            state.currentPrice = parseFloat(e.target.value) || DEFAULTS.currentPrice;
+            priceSlider.value = Math.min(Math.max(state.currentPrice, 60000), 120000);
+            updateUI();
+        });
+
+        userCapitalInput.addEventListener('input', (e) => {
+            state.userCapital = parseFloat(e.target.value) || DEFAULTS.userCapital;
+            updateUI();
+        });
+
+        priceSlider.addEventListener('input', (e) => {
+            state.currentPrice = parseFloat(e.target.value);
+            currentPriceInput.value = state.currentPrice;
+            updateUI();
+        });
+
+        // Button listeners
+        document.getElementById('recalculate-btn').addEventListener('click', updateUI);
+
+        document.getElementById('bullish-btn').addEventListener('click', () => {
+            state.currentPrice = Math.round(state.entryPrice * 1.22);
+            currentPriceInput.value = state.currentPrice;
+            priceSlider.value = Math.min(Math.max(state.currentPrice, 60000), 120000);
+            updateUI();
+        });
+
+        document.getElementById('conservative-btn').addEventListener('click', () => {
+            state.currentPrice = Math.round(state.entryPrice * 0.93);
+            currentPriceInput.value = state.currentPrice;
+            priceSlider.value = Math.min(Math.max(state.currentPrice, 60000), 120000);
+            updateUI();
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            state.capitalBase = DEFAULTS.capitalBase;
+            state.entryPrice = DEFAULTS.entryPrice;
+            state.currentPrice = DEFAULTS.currentPrice;
+            state.userCapital = DEFAULTS.userCapital;
+
+            capitalBaseInput.value = state.capitalBase;
+            entryPriceInput.value = state.entryPrice;
+            currentPriceInput.value = state.currentPrice;
+            userCapitalInput.value = state.userCapital;
+            priceSlider.value = state.currentPrice;
+
+            updateUI();
+        });
+
+        document.getElementById('fetch-price-btn').addEventListener('click', fetchRealPrice);
+
+        // ========== INIT ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial input values
+            capitalBaseInput.value = state.capitalBase;
+            entryPriceInput.value = state.entryPrice;
+            currentPriceInput.value = state.currentPrice;
+            userCapitalInput.value = state.userCapital;
+            priceSlider.value = state.currentPrice;
+        });
+    </script>
+</body>
+</html>
