@@ -11,13 +11,12 @@ Mini app web premium "Bitcoin Growth" en español para mostrar a un cliente pequ
 
 ## Usuarios
 1. **Usuario 1**: Contraseña `mipapimartin` - Capital $100
-2. **Usuario 2**: Contraseña `soytuperra` - Capital $100
+2. **Usuario 2**: Contraseña `soylaperradezl` - Capital $100
 
 ## Características Implementadas
 - [x] Pantalla de login con diseño de dos columnas
 - [x] Dashboard con sidebar (desktop) y mobile header (mobile)
 - [x] Métricas de inversión: BTC comprado, participación, ganancias
-- [x] Simulador con 4 inputs + slider de precio
 - [x] Botones: Recalcular, Escenario Alcista (+22%), Conservador (-7%), Restablecer
 - [x] Botón "Precio Real" para obtener precio BTC de CoinGecko
 - [x] Gráfica de líneas con Chart.js (Base vs Usuario)

@@ -40,7 +40,7 @@
   
   "passed_tests": [
     "Login screen two-column layout on desktop",
-    "Login with both passwords ('mipapimartin', 'soytuperra')",
+    "Login with both passwords ('mipapimartin', 'soylaperradezl')",
     "Wrong password error message display",
     "Dashboard sidebar with BTC amount and ownership percentage",
     "Hero card with portfolio value and BTC price chip",

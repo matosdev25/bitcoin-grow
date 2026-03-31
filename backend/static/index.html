@@ -940,8 +940,8 @@
                         <div class="hero-stat-value">$2,000</div>
                     </div>
                     <div class="hero-stat">
-                        <div class="hero-stat-label">Tu Capital</div>
-                        <div class="hero-stat-value bitcoin">$100</div>
+                        <div class="hero-stat-label">Valor del Portafolio Base</div>
+                        <div class="hero-stat-value bitcoin" id="login-portfolio-value">Cargando...</div>
                     </div>
                 </div>
             </div>
@@ -989,6 +989,55 @@
             </div>
         </div>
     </div>
+    <!-- ========== ADMIN PANEL ========== -->
+<div id="admin-panel" class="hidden">
+    <div class="login-form-container" style="min-height:100vh; flex-direction: column; gap: 2rem;">
+        <div style="width:100%; max-width:500px;">
+            <div class="login-logo" style="margin-bottom:1rem;">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="22" fill="#F7931A"/>
+                    <path d="M32.5 21.5c.5-3.5-2-5.5-5.5-6.5l1-4.5-2.5-.5-1 4.5c-.7-.2-1.4-.3-2-.5l1-4.5-2.5-.5-1 4.5c-.5-.1-1-.2-1.5-.3l-3.5-.8-.5 2.5s2 .4 2 .5c1 .2 1.2 1 1.2 1.5l-1.2 5c.1 0 .2 0 .3.1-.1 0-.2-.1-.3-.1l-1.7 7c-.1.3-.4.8-1 .6 0 0-2-.5-2-.5l-1.3 2.7 3.3.8c.6.2 1.2.3 1.8.5l-1 4.5 2.5.5 1-4.5c.7.2 1.4.4 2 .5l-1 4.5 2.5.5 1-4.5c4.5.8 8 .5 9.5-3.5 1.2-3.2 0-5-2.5-6.2 1.8-.4 3.2-1.6 3.5-4zm-6.2 8.7c-.8 3.5-6.5 1.6-8.3 1.1l1.5-6c1.8.5 7.7 1.4 6.8 4.9zm.8-8.7c-.8 3.2-5.5 1.5-7 1.1l1.3-5.5c1.5.4 6.5 1.1 5.7 4.4z" fill="white"/>
+                </svg>
+                <span class="login-logo-text">Admin Panel</span>
+            </div>
+
+            <div class="simulator-card">
+                <h2 class="section-title" style="margin-bottom:1.5rem;">Agregar Aporte</h2>
+                <div class="simulator-grid">
+                    <div class="simulator-input-group">
+                        <label>Usuario</label>
+                        <select id="admin-user" class="form-input">
+                            <option value="mipapimartin">Surelys Howard</option>
+                            <option value="soylaperradezl">Adonay Antioco</option>
+                        </select>
+                    </div>
+                    <div class="simulator-input-group">
+                        <label>Monto (USD)</label>
+                        <input type="number" id="admin-monto" class="form-input" placeholder="200" min="1" step="1">
+                    </div>
+                    <div class="simulator-input-group">
+                        <label>Precio de compra BTC</label>
+                        <input type="number" id="admin-precio" class="form-input" placeholder="85000" min="1" step="100">
+                    </div>
+                    <div class="simulator-input-group">
+                        <label>Fecha</label>
+                        <input type="text" id="admin-fecha" class="form-input" readonly>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                    <button class="btn btn-primary" id="admin-agregar-btn">Agregar Aporte</button>
+                    <button class="btn btn-secondary" id="admin-logout-btn">Cerrar Sesión</button>
+                </div>
+                <div id="admin-mensaje" class="error-message" style="margin-top:1rem;"></div>
+            </div>
+
+            <div class="simulator-card" style="margin-top:1rem;">
+                <h2 class="section-title" style="margin-bottom:1rem;">Estado Actual</h2>
+                <div id="admin-estado"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- ========== DASHBOARD ========== -->
     <div id="dashboard" class="dashboard" data-testid="dashboard">
@@ -1029,8 +1078,9 @@
             </div>
 
             <div class="sidebar-card" data-testid="sidebar-ownership-card">
-                <div class="sidebar-card-label">Tu Participacion</div>
+                <div class="sidebar-card-label">Tu Participación</div>
                 <div class="sidebar-card-value" id="sidebar-ownership">5.00%</div>
+                <div class="sidebar-card-value small" id="sidebar-ownership-usd">$100.00</div>
             </div>
 
             <div class="sidebar-bullets">
@@ -1053,6 +1103,7 @@
         <main class="main-content" data-testid="main-content">
             <div class="topbar">
                 <div class="topbar-left">
+                    <span class="topbar-badge" id="welcome-msg"></span>
                     <span class="topbar-badge">Panel Principal</span>
                     <h1 class="topbar-title">Haz visible el crecimiento del capital.</h1>
                     <p class="topbar-subtitle">Monitorea tu inversion y simula escenarios de crecimiento.</p>
@@ -1126,51 +1177,6 @@
                 </div>
             </div>
 
-            <!-- Simulator -->
-            <h2 class="section-title">Simulador</h2>
-            <div class="simulator-card" data-testid="simulator-card">
-                <div class="simulator-grid">
-                    <div class="simulator-input-group">
-                        <label for="capital-base">Capital Base (USD)</label>
-                        <input type="number" id="capital-base" value="2000" min="100" step="100" data-testid="capital-base-input" aria-label="Capital base en USD">
-                    </div>
-                    <div class="simulator-input-group">
-                        <label for="entry-price">Precio Entrada BTC</label>
-                        <input type="number" id="entry-price" value="71500" min="1000" step="100" data-testid="entry-price-input" aria-label="Precio de entrada de Bitcoin">
-                    </div>
-                    <div class="simulator-input-group">
-                        <label for="current-price">Precio Actual BTC</label>
-                        <input type="number" id="current-price" value="82500" min="1000" step="100" data-testid="current-price-input" aria-label="Precio actual de Bitcoin">
-                    </div>
-                    <div class="simulator-input-group">
-                        <label for="user-capital">Tu Capital (USD)</label>
-                        <input type="number" id="user-capital" value="100" min="10" step="10" data-testid="user-capital-input" aria-label="Tu capital en USD">
-                    </div>
-                </div>
-
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label">Precio BTC (Slider)</span>
-                        <span class="slider-value" id="slider-value">$82,500</span>
-                    </div>
-                    <input type="range" class="price-slider" id="price-slider" min="60000" max="120000" step="500" value="82500" data-testid="price-slider" aria-label="Deslizador de precio de Bitcoin">
-                </div>
-
-                <div class="simulator-buttons">
-                    <button class="btn btn-primary" id="recalculate-btn" data-testid="recalculate-button">Recalcular</button>
-                    <button class="btn btn-secondary" id="bullish-btn" data-testid="bullish-button">Escenario Alcista</button>
-                    <button class="btn btn-secondary" id="conservative-btn" data-testid="conservative-button">Escenario Conservador</button>
-                    <button class="btn btn-ghost" id="reset-btn" data-testid="reset-button">Restablecer</button>
-                    <button class="btn btn-secondary" id="fetch-price-btn" data-testid="fetch-price-button">
-                        <span class="price-loading hidden" id="price-loading">
-                            <span class="spinner"></span>
-                            Cargando...
-                        </span>
-                        <span id="fetch-price-text">Precio Real</span>
-                    </button>
-                </div>
-            </div>
-
             <!-- Mini Metrics -->
             <div class="mini-metrics" data-testid="mini-metrics">
                 <div class="mini-metric">
@@ -1187,34 +1193,23 @@
                 </div>
             </div>
 
-            <!-- Chart -->
-            <div class="chart-card" data-testid="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">Crecimiento Estimado</h3>
-                    <div class="chart-legend">
-                        <div class="legend-item">
-                            <span class="legend-dot base"></span>
-                            <span>Base</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-dot user"></span>
-                            <span>Usuario</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="growth-chart" aria-label="Grafica de crecimiento comparando la base vs el usuario" data-testid="growth-chart"></canvas>
-                </div>
-            </div>
-        </main>
-    </div>
-
     <script>
         // ========== CONFIGURATION ==========
         const USERS = {
-            'mipapimartin': { capital: 100, name: 'Usuario 1' },
-            'soytuperra': { capital: 100, name: 'Usuario 2' }
-        };
+                'adminmartin': { name: 'Admin', role: 'admin' },
+    'mipapimartin': { 
+        name: 'Surelys Howard',
+        aportes: [
+            { fecha: '2025-02-18', monto: 100 }
+        ]
+    },
+    'soylaperradezl': { 
+        name: 'Adonay Antioco',
+        aportes: [
+            { fecha: '2025-02-18', monto: 30 }
+        ]
+    }
+};
 
         const DEFAULTS = {
             capitalBase: 2000,
@@ -1242,11 +1237,6 @@
         const passwordInput = document.getElementById('password');
         const loginError = document.getElementById('login-error');
 
-        const capitalBaseInput = document.getElementById('capital-base');
-        const entryPriceInput = document.getElementById('entry-price');
-        const currentPriceInput = document.getElementById('current-price');
-        const userCapitalInput = document.getElementById('user-capital');
-        const priceSlider = document.getElementById('price-slider');
 
         // ========== HELPERS ==========
         function formatCurrency(value) {
@@ -1312,7 +1302,7 @@
 
             // Sidebar
             document.getElementById('sidebar-btc-amount').textContent = formatBTC(data.btcAmount);
-            document.getElementById('sidebar-ownership').textContent = formatPercent(data.ownership);
+            document.getElementById('sidebar-ownership-usd').textContent = formatCurrency(data.userValue);
 
             // Hero card
             document.getElementById('portfolio-value').textContent = formatCurrency(data.portfolioValue);
@@ -1510,20 +1500,27 @@
 
         // ========== AUTH ==========
         function login(password) {
-            if (USERS[password]) {
-                state.currentUser = password;
-                state.userCapital = USERS[password].capital;
-                userCapitalInput.value = state.userCapital;
-                
-                loginScreen.classList.add('hidden');
-                dashboard.classList.add('active');
-                loginError.classList.remove('show');
-                
-                updateUI();
-                return true;
-            }
-            return false;
-        }
+    if (password === 'adminmartin') {
+        loginError.classList.remove('show');
+        showAdminPanel();
+        return true;
+    }
+    
+    if (USERS[password] && USERS[password].aportes) {
+        state.currentUser = password;
+        state.userCapital = USERS[password].aportes.reduce((sum, a) => sum + a.monto, 0);
+        
+        loginScreen.classList.add('hidden');
+        dashboard.classList.add('active');
+        loginError.classList.remove('show');
+        
+        document.getElementById('welcome-msg').textContent = 'Bienvenido, ' + USERS[password].name;
+        
+        updateUI();
+        return true;
+    }
+    return false;
+}
 
         function logout() {
             state.currentUser = null;
@@ -1579,77 +1576,111 @@
         document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
         document.getElementById('mobile-theme-toggle').addEventListener('click', toggleTheme);
 
-        // Input listeners
-        capitalBaseInput.addEventListener('input', (e) => {
-            state.capitalBase = parseFloat(e.target.value) || DEFAULTS.capitalBase;
-            updateUI();
+        // ========== ADMIN ==========
+function showAdminPanel() {
+    loginScreen.classList.add('hidden');
+    document.getElementById('admin-panel').classList.remove('hidden');
+    
+    // Fecha automática de hoy
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('admin-fecha').value = hoy;
+    
+    renderAdminEstado();
+}
+
+function renderAdminEstado() {
+    const container = document.getElementById('admin-estado');
+    let html = '';
+    
+    ['mipapimartin', 'soylaperradezl'].forEach(key => {
+        const user = USERS[key];
+        const total = user.aportes.reduce((sum, a) => sum + a.monto, 0);
+        html += `<div style="margin-bottom:1.5rem;">
+            <strong style="color:var(--bitcoin)">${user.name}</strong>
+            <div style="margin-top:0.5rem;">`;
+        
+        user.aportes.forEach(a => {
+            html += `<div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-secondary); padding:0.25rem 0; border-bottom:1px solid var(--border);">
+                <span>${a.fecha}</span>
+                <span>$${a.monto.toLocaleString()}</span>
+                ${a.precio ? `<span style="color:var(--text-muted)">@ $${a.precio.toLocaleString()}</span>` : ''}
+            </div>`;
         });
+        
+        html += `<div style="display:flex; justify-content:space-between; font-size:0.9rem; font-weight:600; margin-top:0.5rem;">
+                <span>Total</span>
+                <span style="color:var(--profit)">$${total.toLocaleString()}</span>
+            </div>
+            </div>
+        </div>`;
+    });
+    
+    container.innerHTML = html;
+}
 
-        entryPriceInput.addEventListener('input', (e) => {
-            state.entryPrice = parseFloat(e.target.value) || DEFAULTS.entryPrice;
-            updateUI();
-        });
+document.getElementById('admin-agregar-btn').addEventListener('click', () => {
+    const userKey = document.getElementById('admin-user').value;
+    const monto = parseFloat(document.getElementById('admin-monto').value);
+    const precio = parseFloat(document.getElementById('admin-precio').value);
+    const fecha = document.getElementById('admin-fecha').value;
+    const mensaje = document.getElementById('admin-mensaje');
 
-        currentPriceInput.addEventListener('input', (e) => {
-            state.currentPrice = parseFloat(e.target.value) || DEFAULTS.currentPrice;
-            priceSlider.value = Math.min(Math.max(state.currentPrice, 60000), 120000);
-            updateUI();
-        });
+    if (!monto || monto <= 0) {
+        mensaje.textContent = 'Ingresa un monto válido.';
+        mensaje.classList.add('show');
+        return;
+    }
 
-        userCapitalInput.addEventListener('input', (e) => {
-            state.userCapital = parseFloat(e.target.value) || DEFAULTS.userCapital;
-            updateUI();
-        });
+    if (!precio || precio <= 0) {
+        mensaje.textContent = 'Ingresa un precio de compra válido.';
+        mensaje.classList.add('show');
+        return;
+    }
 
-        priceSlider.addEventListener('input', (e) => {
-            state.currentPrice = parseFloat(e.target.value);
-            currentPriceInput.value = state.currentPrice;
-            updateUI();
-        });
+    USERS[userKey].aportes.push({ fecha, monto, precio });
+    
+    // Recalcula capital base total
+    const totalSurelys = USERS['mipapimartin'].aportes.reduce((sum, a) => sum + a.monto, 0);
+    const totalAdonay = USERS['soylaperradezl'].aportes.reduce((sum, a) => sum + a.monto, 0);
+    DEFAULTS.capitalBase = totalSurelys + totalAdonay;
 
-        // Button listeners
-        document.getElementById('recalculate-btn').addEventListener('click', updateUI);
+    // Actualiza precio de entrada promedio ponderado
+    const todosAportes = [
+        ...USERS['mipapimartin'].aportes,
+        ...USERS['soylaperradezl'].aportes
+    ];
+    const totalInvertido = todosAportes.reduce((sum, a) => sum + a.monto, 0);
+    const precioPromedio = todosAportes.reduce((sum, a) => sum + (a.monto * (a.precio || DEFAULTS.entryPrice)), 0) / totalInvertido;
+    DEFAULTS.entryPrice = Math.round(precioPromedio);
 
-        document.getElementById('bullish-btn').addEventListener('click', () => {
-            state.currentPrice = Math.round(state.entryPrice * 1.22);
-            currentPriceInput.value = state.currentPrice;
-            priceSlider.value = Math.min(Math.max(state.currentPrice, 60000), 120000);
-            updateUI();
-        });
+    mensaje.textContent = `✓ Aporte de $${monto} agregado a ${USERS[userKey].name}`;
+    mensaje.style.background = 'var(--profit-bg)';
+    mensaje.style.borderColor = 'var(--profit)';
+    mensaje.style.color = 'var(--profit)';
+    mensaje.classList.add('show');
 
-        document.getElementById('conservative-btn').addEventListener('click', () => {
-            state.currentPrice = Math.round(state.entryPrice * 0.93);
-            currentPriceInput.value = state.currentPrice;
-            priceSlider.value = Math.min(Math.max(state.currentPrice, 60000), 120000);
-            updateUI();
-        });
+    document.getElementById('admin-monto').value = '';
+    document.getElementById('admin-precio').value = '';
+    
+    renderAdminEstado();
+});
 
-        document.getElementById('reset-btn').addEventListener('click', () => {
-            state.capitalBase = DEFAULTS.capitalBase;
-            state.entryPrice = DEFAULTS.entryPrice;
-            state.currentPrice = DEFAULTS.currentPrice;
-            state.userCapital = DEFAULTS.userCapital;
-
-            capitalBaseInput.value = state.capitalBase;
-            entryPriceInput.value = state.entryPrice;
-            currentPriceInput.value = state.currentPrice;
-            userCapitalInput.value = state.userCapital;
-            priceSlider.value = state.currentPrice;
-
-            updateUI();
-        });
-
-        document.getElementById('fetch-price-btn').addEventListener('click', fetchRealPrice);
-
+document.getElementById('admin-logout-btn').addEventListener('click', () => {
+    document.getElementById('admin-panel').classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+    passwordInput.value = '';
+});
         // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', () => {
-            // Set initial input values
-            capitalBaseInput.value = state.capitalBase;
-            entryPriceInput.value = state.entryPrice;
-            currentPriceInput.value = state.currentPrice;
-            userCapitalInput.value = state.userCapital;
-            priceSlider.value = state.currentPrice;
-        });
+    const btcAmount = DEFAULTS.capitalBase / DEFAULTS.entryPrice;
+    const portfolioValue = btcAmount * DEFAULTS.currentPrice;
+    document.getElementById('login-portfolio-value').textContent = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(portfolioValue);
+});
     </script>
 </body>
 </html>
